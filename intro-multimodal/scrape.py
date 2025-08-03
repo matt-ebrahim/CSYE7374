@@ -5,6 +5,7 @@ import os
 import requests
 import logging
 import argparse
+import asyncio
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 from time import sleep
@@ -12,6 +13,7 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 import pdfplumber  # Add to requirements.txt
+# Note: Playwright is required for PMC PDF downloads: pip install playwright && playwright install chromium
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -250,11 +252,23 @@ class PaperScraper:
                         if len(buffer) >= 1024:
                             break
 
-                # If it looks like HTML (common when blocked or redirected), save and error
+                # If it looks like HTML (common when blocked or redirected), try Playwright fallback
                 prefix = bytes(buffer[:15])
                 if prefix.startswith(b'<!') or b'<html' in buffer.lower() or 'html' in content_type:
+                    # Check if this is a PMC POW challenge
+                    html_content = buffer.decode('utf-8', errors='ignore')
+                    if any(indicator in html_content.lower() for indicator in [
+                        'preparing to download', 'pow-dbe6590f.js', 'cloudpmc-viewer-pow', 
+                        'proof of work', 'javascript challenge'
+                    ]):
+                        logger.info(f"Detected PMC POW challenge, trying Playwright fallback for {pdf_url}")
+                        try:
+                            return self._fetch_pdf_via_playwright(pdf_url, filename)
+                        except Exception as playwright_error:
+                            logger.warning(f"Playwright fallback failed: {playwright_error}")
+                    
+                    # If not a POW challenge or Playwright failed, save debug and error
                     debug_path = f"{filename}.debug.html"
-                    # Save full body for manual inspection (re-fetch small amount to avoid truncation)
                     with open(debug_path, "wb") as f:
                         f.write(buffer)
                         # try to append more if available
@@ -284,6 +298,144 @@ class PaperScraper:
         except Exception as e:
             logger.error(f"Failed to download actual PDF: {e}")
             raise
+
+    def _fetch_pdf_via_playwright(self, pdf_url: str, filename: str) -> str:
+        """
+        Robust Playwright fallback: handle sync vs async and pre-resolve POW.
+        """
+        try:
+            # If there's a running loop, delegate to async; else use sync
+            asyncio.get_running_loop()
+            return asyncio.run(self._fetch_pdf_via_playwright_async(pdf_url, filename))
+        except RuntimeError:
+            return self._fetch_pdf_via_playwright_sync(pdf_url, filename)
+
+    def _fetch_pdf_via_playwright_sync(self, pdf_url: str, filename: str) -> str:
+        """
+        Use Playwright sync API to handle PMC POW challenges and download PDF.
+        """
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            raise ImportError("Playwright is required for PMC PDF downloads. Install with: pip install playwright && playwright install chromium")
+        
+        logger.info(f"Using Playwright (sync) to handle PMC challenge for {pdf_url}")
+        
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context()
+            page = context.new_page()
+
+            # Step 1: visit parent article page to resolve POW
+            if "/pdf/" in pdf_url:
+                parent = pdf_url.split("/pdf/")[0] + "/"
+                page.goto(parent, wait_until="networkidle", timeout=60000)
+                page.wait_for_timeout(2000)  # allow challenge to complete
+
+            pdf_bytes = None
+
+            def handle_response(response):
+                nonlocal pdf_bytes
+                ct = response.headers.get("content-type", "")
+                if "pdf" in ct.lower() or response.url.lower().endswith(".pdf"):
+                    try:
+                        pdf_bytes = response.body()
+                    except Exception:
+                        pass
+
+            page.on("response", handle_response)
+            page.goto(pdf_url, wait_until="networkidle", timeout=60000)
+            page.wait_for_timeout(2000)
+
+            if pdf_bytes and pdf_bytes.startswith(b"%PDF-"):
+                with open(filename, "wb") as f:
+                    f.write(pdf_bytes)
+                logger.info(f"PDF captured directly via Playwright: {filename}")
+                return filename
+
+            # Fallback: extract cookies and replay with requests
+            cookies = context.cookies()
+            session = requests.Session()
+            for c in cookies:
+                session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path"))
+
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "Referer": pdf_url.rsplit("/pdf/", 1)[0] + "/" if "/pdf/" in pdf_url else pdf_url,
+                "Accept": "application/pdf,*/*"
+            }
+            resp = session.get(pdf_url, headers=headers, timeout=60)
+            resp.raise_for_status()
+            if not resp.content.startswith(b"%PDF-"):
+                raise ValueError(f"Still not PDF after POW resolution. Content-Type: {resp.headers.get('Content-Type')}")
+            with open(filename, "wb") as f:
+                f.write(resp.content)
+            logger.info(f"PDF downloaded via Playwright + requests: {filename}")
+            return filename
+
+    async def _fetch_pdf_via_playwright_async(self, pdf_url: str, filename: str) -> str:
+        """
+        Use Playwright async API to handle PMC POW challenges and download PDF.
+        """
+        try:
+            from playwright.async_api import async_playwright
+        except ImportError:
+            raise ImportError("Playwright is required for PMC PDF downloads. Install with: pip install playwright && playwright install chromium")
+        
+        logger.info(f"Using Playwright (async) to handle PMC challenge for {pdf_url}")
+        
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context()
+            page = await context.new_page()
+
+            # Resolve POW via parent article first
+            if "/pdf/" in pdf_url:
+                parent = pdf_url.split("/pdf/")[0] + "/"
+                await page.goto(parent, wait_until="networkidle")
+                await asyncio.sleep(2)
+
+            pdf_bytes = None
+
+            async def handle_response(response):
+                nonlocal pdf_bytes
+                headers = await response.all_headers()
+                ct = headers.get("content-type", "")
+                if "pdf" in ct.lower() or response.url.lower().endswith(".pdf"):
+                    try:
+                        pdf_bytes = await response.body()
+                    except Exception:
+                        pass
+
+            page.on("response", handle_response)
+            await page.goto(pdf_url, wait_until="networkidle")
+            await asyncio.sleep(2)
+
+            if pdf_bytes and pdf_bytes.startswith(b"%PDF-"):
+                with open(filename, "wb") as f:
+                    f.write(pdf_bytes)
+                logger.info(f"PDF captured directly via Playwright (async): {filename}")
+                return filename
+
+            # Fallback via requests with cookies
+            cookies = await context.cookies()
+            session = requests.Session()
+            for c in cookies:
+                session.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path"))
+
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "Referer": pdf_url.rsplit("/pdf/", 1)[0] + "/" if "/pdf/" in pdf_url else pdf_url,
+                "Accept": "application/pdf,*/*"
+            }
+            resp = session.get(pdf_url, headers=headers, timeout=60)
+            resp.raise_for_status()
+            if not resp.content.startswith(b"%PDF-"):
+                raise ValueError(f"Still not PDF after POW resolution. Content-Type: {resp.headers.get('Content-Type')}")
+            with open(filename, "wb") as f:
+                f.write(resp.content)
+            logger.info(f"PDF downloaded via Playwright + requests (async): {filename}")
+            return filename
 
     def _save_pdf_response(self, response: requests.Response, filename: str) -> str:
         """
