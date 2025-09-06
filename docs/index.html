@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSYE 7374 – Frontiers in Generative AI for Medical Imaging and Healthcare (Fall 2025)</title>
+  <title>CSYE 7374 – Applied Deep Learning and Generative Models in Healthcare (Fall 2025)</title>
 
-  <!-- Bootstrap 5 -->
+  <!-- Bootstrap 5 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-1CmrxMRARb6aLqgBO7uuY8UXhKJb4mVB5x1ir5iADo3Vjd3V9mUzzV0qF29UaFrS" crossorigin="anonymous" />
   <!-- FontAwesome (optional icons) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -46,8 +46,8 @@
   <!-- Header / Banner -->
   <header class="py-4 text-center">
     <div class="container">
-      <h1>CSYE 7374: Frontiers in Generative AI for Medical Imaging and Healthcare</h1>
-      <p>Northeastern University · Fall 2025 · Instructor: Matt Ebrahim (Mahmoud Ebrahimkhani)</p>
+      <h1>CSYE 7374: Applied Deep Learning and Generative Models in Healthcare</h1>
+      <p>Northeastern University · Fall 2025 · Instructor: Matt Ebrahim (Mahmoud Ebrahimkhani)</p>
     </div>
   </header>
 
@@ -61,9 +61,9 @@
           <div class="card shadow-sm h-100">
             <div class="card-body">
               <h5 class="card-title">Instructor</h5>
-              <p class="mb-1 fw-semibold">Matt Ebrahim (Mahmoud Ebrahimkhani)</p>
+              <p class="mb-1 fw-semibold">Matt Ebrahim (Mahmoud Ebrahimkhani)</p>
               <p class="mb-1"><strong>Email:</strong> <a href="mailto:m.ebrahimkhani@northeastern.edu">m.ebrahimkhani@northeastern.edu</a></p>
-              <p class="mb-1"><strong>Office Hours:</strong> Fridays 11:00 – 12:00 PM ET (Zoom)</p>
+              <p class="mb-1"><strong>Office Hours:</strong> Fridays 11:00 – 12:00 PM ET (Zoom)</p>
             </div>
           </div>
         </div>
@@ -72,8 +72,8 @@
           <div class="card shadow-sm h-100">
             <div class="card-body">
               <h5 class="card-title">Course Details</h5>
-              <p class="mb-1"><strong>Meeting Times:</strong> Saturdays 12:30 – 4:00 PM ET</p>
-              <p class="mb-1"><strong>Format:</strong> Virtual (Zoom)</p>
+              <p class="mb-1"><strong>Meeting Times:</strong> Saturdays 12:30 – 4:00 PM ET</p>
+              <p class="mb-1"><strong>Format:</strong> Virtual (Zoom)</p>
             </div>
           </div>
         </div>
@@ -83,16 +83,13 @@
     <!-- Course Description -->
     <section id="description" class="mt-5">
       <h2 class="mb-3">Course Description</h2>
-      <p>This course provides a <strong>hands‑on introduction</strong> to state‑of‑the‑art generative AI for healthcare. Students will build and experiment with advanced techniques—including latent‑space diffusion models for conditional synthetic medical‑image generation—and gain working knowledge of large language models (LLMs) and modern natural‑language‑processing workflows.</p>
-      <p class="fw-semibold mb-1">Key topics include:</p>
-      <ul>
-        <li>Diffusion and latent‑diffusion models for synthesizing medical data in low‑resource domains (e.g., rare diseases)</li>
-        <li>Text‑to‑image and image‑to‑text pipelines, enabling multimodal analysis and reporting</li>
-        <li>Retrieval‑augmented generation (RAG) and chatbot architectures for clinical knowledge retrieval and decision support</li>
-        <li>Safe, bias‑aware, and regulatory‑compliant deployment of generative models in real healthcare settings</li>
-      </ul>
-      <p>By the end of the course, students will be able to design, train, and critically evaluate cutting‑edge generative AI systems to tackle complex challenges in medical imaging, drug discovery, and other healthcare applications.</p>
-      <a href="syllabus.pdf" class="btn btn-outline-primary btn-sm my-2" target="_blank">See Complete Syllabus</a>
+      <p>This course provides a comprehensive introduction to generative AI techniques and their applications in healthcare. Students will explore cutting-edge methods spanning from foundational deep learning architectures to state-of-the-art generative models, with hands-on implementation experience throughout.</p>
+      <p class="fw-semibold mb-1">The course progresses through three main phases:</p>
+      <p><strong>Foundations & Language Models (Weeks 1-5):</strong> Beginning with large language models specialized for biomedical applications (BioBERT, Med-PaLM), students will learn fine-tuning strategies, retrieval-augmented generation (RAG) for clinical knowledge retrieval, and multimodal learning approaches including CLIP and MedCLIP. Self-supervised and contrastive learning methods will provide essential background for understanding modern medical AI systems.</p>
+      <p><strong>Computer Vision & Generative Models (Weeks 6-10):</strong> The course then covers medical image analysis fundamentals including segmentation and classification using CNNs and Vision Transformers, before diving deep into generative approaches. Students will implement GANs for medical image synthesis and master diffusion models—from DDPM theory to practical latent diffusion applications. Special emphasis on synthetic data generation for rare diseases and data augmentation strategies.</p>
+      <p><strong>Molecular AI & Drug Discovery (Weeks 11-12):</strong> Advanced topics include protein language models (AlphaFold, ESM-2) for structure prediction and generative AI methods for drug discovery, including GFlowNets and molecular diffusion models.</p>
+      <p>Throughout the course, students will complete four hands-on assignments and a final project, gaining practical experience in designing, training, and evaluating generative AI systems for real-world healthcare challenges.</p>
+      <a href="materials/csye-7374-fall-25-syllabus.pdf" class="btn btn-outline-primary btn-sm my-2" target="_blank">See Complete Syllabus</a>
     </section>
 
     <!-- Course Schedule & Materials -->
@@ -109,48 +106,16 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Week 1 -->
+            <!-- Week 1 -->
             <tr>
               <th scope="row">1</th>
-              <td>09 / 04 / 25</td>
+              <td>09 / 06 / 25</td>
               <td>Introduction & Diffusion‑Model Foundations</td>
               <td>
                 <a class="btn btn-primary btn-sm btn-material me-1" href="materials/01-250906.pdf" target="_blank">Slides</a>
                 <a class="btn btn-success btn-sm btn-material" href="https://github.com/matt-ebrahim/CSYE7374/blob/main/intro-neural-nets/into-image-classification.ipynb" target="_blank">Notebook</a>
               </td>
             </tr>
-            <!-- Week 2 -->
-            <tr>
-              <th scope="row">2</th>
-              <td>09 / 13 / 25</td>
-              <td>Large Language Models (BioBERT, Med-PaLM, fine-tuning)</td>
-              <td>
-                <a class="btn btn-primary btn-sm btn-material me-1" href="materials/02-250913.pdf" target="_blank">Slides</a>
-                <a class="btn btn-success btn-sm btn-material" href="https://github.com/matt-ebrahim/CSYE7374/blob/main/into-rnn/intro-rnn.ipynb" target="_blank">Notebook</a>
-              </td>
-            </tr>
-            <!-- Week 3 -->
-            <tr>
-              <th scope="row">3</th>
-              <td>09 / 20 / 25</td>
-              <td>Retrieval-Augmented Generation & Clinical NLP</td>
-              <td>
-                <a class="btn btn-primary btn-sm btn-material me-1" href="materials/03-250920.pdf" target="_blank">Slides</a>
-                <a class="btn btn-success btn-sm btn-material me-1" href="https://github.com/matt-ebrahim/CSYE7374/blob/main/intro-multimodal/medgemma_4b_multimodal_demo.ipynb" target="_blank">Notebook-1</a>
-                <a class="btn btn-success btn-sm btn-material" href="https://github.com/matt-ebrahim/CSYE7374/blob/main/intro-multimodal/research_assistant.ipynb" target="_blank">Notebook-2</a>
-              </td>
-            </tr>
-            <!-- Week 4 -->
-            <tr>
-              <th scope="row">4</th>
-              <td>09 / 27 / 25</td>
-              <td>GenAI: Variational AutoEncoders</td>
-              <td>
-                <a class="btn btn-primary btn-sm btn-material me-1" href="materials/04-250927.pdf" target="_blank">Slides</a>
-                <a class="btn btn-success btn-sm btn-material" href="https://github.com/matt-ebrahim/CSYE7374/blob/main/intro-variational-autoencoders/autoencoders.ipynb" target="_blank">Notebook-1</a>
-              </td>
-            </tr>
-            <!-- Duplicate <tr> for additional weeks -->
           </tbody>
         </table>
       </div>
@@ -159,7 +124,7 @@
 
   <!-- Footer -->
   <footer class="text-center py-3 small text-muted">
-    &copy; 2025 Matt Ebrahim. Built with Bootstrap. Licensed under <a href="LICENSE">MIT</a>.
+    &copy; 2025 Matt Ebrahim. Built with Bootstrap. Licensed under <a href="LICENSE">MIT</a>.
   </footer>
 
   <!-- Bootstrap JS -->
