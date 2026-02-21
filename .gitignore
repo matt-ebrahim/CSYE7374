@@ -1,0 +1,30 @@
+# Presenter notes and local documentation
+**/presenter_notes.docx
+**/*_presenter_notes.docx
+segmentation_notebook_presenter_notes.docx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
